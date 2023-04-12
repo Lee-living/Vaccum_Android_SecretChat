@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/msg_layout"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_margin="10dp"
+              android:background="#F5F5F5">
+
+    <LinearLayout
+            android:id="@+id/left_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:padding="10dp"
+            android:visibility="gone">
+<!--        android:background="@drawable/left_msg_bg"-->
+
+        <TextView
+                android:id="@+id/left_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="20"
+                android:minLines="1"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="#FF000000" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/right_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00C957"
+            android:padding="10dp"
+            android:visibility="gone">
+<!--    android:background="@drawable/right_msg_bg"-->
+
+        <TextView
+                android:id="@+id/right_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="20"
+                android:minLines="1"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="#FF000000" />
+
+    </LinearLayout>
+
+</LinearLayout>

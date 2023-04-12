@@ -1,0 +1,25 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#BDFCC9">
+    <!-- 刷新按钮 -->
+
+    <!-- 好友列表 -->
+    <ImageButton
+            android:id="@+id/refresh_button"
+            android:layout_width="80dp"
+            android:layout_height="82dp"
+            android:src="@drawable/ic_refresh"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="19dp"
+            android:layout_marginTop="6dp" tools:ignore="SpeakableTextPresentCheck"
+            android:layout_alignParentTop="true"/>
+    <ListView
+            android:id="@+id/friends_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/refresh_button"
+            android:padding="16dp"/>
+
+</RelativeLayout>

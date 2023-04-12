@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/drawable/ic_launcher_background.xml" value="0.15833333333333333" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/drawable/shape.xml" value="0.2375" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/activity_login.xml" value="0.2857142857142857" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/activity_main.xml" value="0.2857142857142857" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/activity_maintest.xml" value="0.2857142857142857" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/activity_msg.xml" value="0.2857142857142857" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/activity_test.xml" value="0.22644927536231885" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/chat_bubble.xml" value="0.18857142857142858" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/item_received_msg.tld" value="0.2341485507246377" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/item_received_msg.xml" value="0.22644927536231885" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/item_sent_msg.xml.tld" value="0.22644927536231885" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/msg_item.xml" value="0.18857142857142858" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/msg_item_received.xml" value="0.22644927536231885" />
+        <entry key="..\:/Users/Lee/Desktop/client/app/src/main/res/layout/msg_item_sent.xml" value="0.22644927536231885" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="jbr-11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
