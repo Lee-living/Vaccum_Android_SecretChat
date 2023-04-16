@@ -42,6 +42,9 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
 //        websocket
     implementation "org.java-websocket:Java-WebSocket:1.4.0"
+//    jdbc
+    implementation 'org.xerial:sqlite-jdbc:3.34.0'
+
 
 
 

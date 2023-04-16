@@ -1,18 +1,20 @@
 package com.lee.function;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lee.domain.Message;
 import jakarta.websocket.Session;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class Refresh {
-
+public class FriendList {
+    ObjectMapper objectMapper = new ObjectMapper();
     private CopyOnWriteArraySet<Session> SessionSet;
 
-    public Refresh(CopyOnWriteArraySet<Session> SessionSet) {
+    public FriendList(CopyOnWriteArraySet<Session> SessionSet) {
         this.SessionSet = SessionSet;
     }
 
-    public Message RefreshList(){
+    public String RefreshList() throws JsonProcessingException {
         //新建一个usernames 存用户数据
         StringBuffer usernames = new StringBuffer();
 
@@ -26,8 +28,11 @@ public class Refresh {
         //删掉最后一个逗号
         usernames.deleteCharAt(usernames.length() - 1);
         //返回好友列表消息  10
-        Message responseMsg = new Message(10,null,usernames.toString(),null);
-        return responseMsg;
+        Message refreshListMsg = new Message(10,null,usernames.toString(),null);
+
+        String refreshListjson = objectMapper.writeValueAsString(refreshListMsg);
+
+        return refreshListjson;
     }
 
 }

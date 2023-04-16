@@ -45,18 +45,17 @@ public class Login{
                 //判断登陆用户是否已在其他地方登陆
                 if(username.equals(sendname)){
                     //已登陆返回 19
-                    Message retureMsg = new Message(19,null,"账号已在其他地方登陆",null);
-                    return retureMsg;
+                    Message loginResponseMsg = new Message(19,null,"账号已在其他地方登陆",null);
+                    return loginResponseMsg;
                 }
             }
             //通过遍历SessionSet后 返回20
-            Message retureMsg = new Message(20,msg.getUser(),"登陆成功捏",null);
-            return retureMsg;
-
+            Message loginResponseMsg = new Message(20,msg.getUser(),"登陆成功捏",null);
+            return loginResponseMsg;
         } else {
             // 用户名和密码不匹配，验证失败 返回19
-            Message retureMsg = new Message(19,null,"账号或密码 不对，登陆失败",null);
-            return retureMsg;
+            Message loginResponseMsg = new Message(19,null,"账号或密码 不对，登陆失败",null);
+            return loginResponseMsg;
         }
     }
 
