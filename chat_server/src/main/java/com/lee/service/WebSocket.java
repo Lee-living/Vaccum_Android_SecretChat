@@ -71,9 +71,20 @@ public class WebSocket {
 
     @OnMessage
     public void onMessage(String receiveMsg) throws IOException {
+
+        if ("heartbeat".equals(receiveMsg)) {
+            // 如果收到心跳消息，则直接回复心跳响应消息
+            System.out.println(receiveMsg);
+            session.getBasicRemote().sendText("heartbeat response");
+            return;
+        }
+
+
+
 //        System.out.println(session.getBasicRemote());
         // 处理收到的消息
         // 打印一下消息内容
+
         System.out.println(receiveMsg);
 
         //接收到的消息 反序列化成Message
@@ -112,7 +123,7 @@ public class WebSocket {
                             //序列化  responseMsgjson
                             responseMsgjson = objectMapper.writeValueAsString(responseMsg);
 //                            System.out.println(session.getBasicRemote());
-                            // 登陆成功  发送回客户端
+                            // 登陆成功  发送回客户端k
                             session.getBasicRemote().sendText(responseMsgjson);
 
                             FriendList friendList2 = new FriendList(SessionSet);
@@ -187,6 +198,9 @@ public class WebSocket {
     public void sendMessage(Message msg) {
         // 发送消息
     }
+
+
+
 
 }
 

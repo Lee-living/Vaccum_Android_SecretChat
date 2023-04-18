@@ -13,8 +13,8 @@ public class CAController {
     public String registerPublicKey(@RequestParam String username, @RequestParam String publicKeyStr) {
         //接收到消息后，将用户名和公钥存入map中
         userKeyMap.put(username, publicKeyStr);
-//        System.out.println(username);
-//        System.out.println(publicKeyStr);
+        System.out.println(username);
+        System.out.println(publicKeyStr);
         return "Success";
     }
 

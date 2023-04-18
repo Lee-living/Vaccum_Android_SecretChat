@@ -1,6 +1,5 @@
 package com.lee.client;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.view.View;
@@ -11,13 +10,11 @@ import android.os.Bundle;
 import com.google.gson.Gson;
 import com.lee.domain.Message;
 
-import com.lee.domain.UserKeyDatabase;
 import com.lee.service.CA;
 import com.lee.service.WebSocketManager;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,6 +33,7 @@ public class MaintestActivity extends AppCompatActivity {
     }
 
 
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +42,6 @@ public class MaintestActivity extends AppCompatActivity {
         // 初始化控件
         friendsList = findViewById(R.id.friends_list);
         refreshButton = findViewById(R.id.refresh_button);
-
 
 
         //把用户列表放到friends
@@ -108,8 +105,6 @@ public class MaintestActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
 
     }
 }

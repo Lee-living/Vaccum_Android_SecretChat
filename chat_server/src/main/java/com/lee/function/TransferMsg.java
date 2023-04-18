@@ -30,7 +30,7 @@ public class TransferMsg {
 
     //生成 发给发送者的回执消息 30
     public String responseMsgYes() throws JsonProcessingException {
-        Message responseMsgYes = new Message(30,null,"登陆成功捏",null);
+        Message responseMsgYes = new Message(30,msg.getUser(),"登陆成功捏",null);
         String sendresponsejosn = objectMapper.writeValueAsString(responseMsgYes);
         return sendresponsejosn;
     }

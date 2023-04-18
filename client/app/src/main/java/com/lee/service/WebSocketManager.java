@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.lee.client.DBHelper;
 import com.lee.client.LoginActivity;
 import com.lee.client.MaintestActivity;
 import com.lee.client.MsgActivity;
@@ -23,16 +24,26 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.*;
 
 import static java.util.concurrent.Executors.*;
 
 public class WebSocketManager {
 //    Gson gson1 = new GsonBuilder().registerTypeAdapter(Message.class, new MessageAdapter()).create();
+
+    private static final int HEARTBEAT_INTERVAL = 5000; // 心跳间隔时间
+
+    private Timer mHeartbeatTimer;
+    ScheduledExecutorService mExecutor;
+    ScheduledFuture<?> mFuture;
+
 
     Gson gson = new Gson();
     public static String[] splitUsernames = new String[5];
@@ -44,6 +55,8 @@ public class WebSocketManager {
     private static ExecutorService executorService; // 线程池
     private static WebSocketManager instance;
     private WebSocketClient websocket;
+    DBHelper dbHelper = new DBHelper(mContext);
+
 
     private WebSocketManager() throws IllegalAccessException, InstantiationException {
         // 初始化线程池
@@ -65,10 +78,20 @@ public class WebSocketManager {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
                 Log.d("WebSocket", "Connected");
+
+                startHeartbeat();
             }
 
             @Override
             public void onMessage(String message) {
+
+
+                if ("heartbeat response".equals(message)) {
+                    // 如果收到心跳消息，则直接回复心跳响应消息
+                    return;
+                }
+
+
                 // 接受到服务器发来的消息 提交任务到线程池中处理
                 executorService.submit(new Runnable() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -125,12 +148,13 @@ public class WebSocketManager {
                                 }
                                 //登录成功就把 公钥注册到 CA服务器
                                 try {
-//                                    System.out.println(LoginActivity.DHCode);
-//                                    System.out.println( LoginActivity.DHCode.getPublicKey());
+
                                     CA.registerPublicKey(msg.getUser(), LoginActivity.DHCode.getPublicKey());
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
+//                                System.out.println(LoginActivity.DHCode);
+//                                System.out.println( LoginActivity.DHCode.getPublicKey());
                                 break;
                                 //接受在线好友列表
                             case 10:
@@ -140,6 +164,42 @@ public class WebSocketManager {
                                     splitUsernames = usernames.split(",");
                                     System.out.println(splitUsernames);
                                 }
+                                for (String splitUsername : splitUsernames) {
+
+                                    dbHelper.createFriendMessagesTable(splitUsername);
+
+                                    CompletableFuture<String> publicKeyFuture = CompletableFuture.supplyAsync(() -> {
+                                        try {
+                                            return CA.getPublicKey(splitUsername);
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    });
+                                    // 等待返回结果
+                                    String publicKeyString = publicKeyFuture.join();
+                                    //System.out.println(publicKeyString);
+                                    //把String 的公钥base64转成byte[]方便使用
+                                    byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString);
+                                    //用对方的公钥 和自己的私钥 生成共享密钥
+                                    byte[] sharedSecret = LoginActivity.DHCode.generateSecretKey(publicKeyBytes);
+                                    //再用sha256和共享密钥生成sharedSecret
+                                    MessageDigest sha256;
+                                    try {
+                                        sha256 = MessageDigest.getInstance("SHA-256");
+                                    } catch (NoSuchAlgorithmException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    byte[] key = sha256.digest(sharedSecret);
+                                    dbHelper.insertOrUpdateFriendKey(splitUsername, Base64.getEncoder().encodeToString(key));
+                                    System.out.println("存的公钥key" + key);
+//                                    System.out.println(Base64.getEncoder().encodeToString(key));
+
+//                                    final String friendPublicKey = dbHelper.getFriendPublicKey(splitUsername);
+//                                    System.out.println(friendPublicKey);
+
+                                }
+
+
 //                                Intent intent21 = new Intent(mContext, MaintestActivity.class);
 //                                mContext.startActivity(intent21);
                                 break;
@@ -159,9 +219,9 @@ public class WebSocketManager {
                                 //发送消息成功的回执
                             case 30:
                                 //发广播 通知消息发送成功 刷新消息界面
-                                String secretMsg30 = msg.getSecretMsg();
+//                                String secretMsg30 = msg.getSecretMsg();
                                 Intent intent30 = new Intent("30");
-                                intent30.putExtra("message", secretMsg30);
+//                                intent30.putExtra("message", secretMsg30);
                                 mContext.sendBroadcast(intent30);
 
                                 if (mContext instanceof Activity) {
@@ -174,10 +234,26 @@ public class WebSocketManager {
                                 break;
                                 //收到别人发来消息
                             case 31:
-                                String secretMsg31 = msg.getSecretMsg();
+
+                                byte[] shareKeyBytes = Base64.getDecoder().decode(dbHelper.getFriendPublicKey(msg.getUser()));
+                                System.out.println("获取到的"+ shareKeyBytes);
+                                byte[] secretMsg = Base64.getDecoder().decode(msg.getSecretMsg());
+                                byte[] secretDecryptMsg = new byte[0];
+                                try {
+                                    secretDecryptMsg = DHKeyExchange.decrypt(secretMsg,shareKeyBytes);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                                String message = new String(secretDecryptMsg, StandardCharsets.UTF_8);
+                                dbHelper.insertMessage(msg.getUser(),1,message);
+
+
+
+//                                String secretMsg31 = msg.getSecretMsg();
                                 //发广播消息通知收到消息了
                                 Intent intent31 = new Intent("31");
-                                intent31.putExtra("message", secretMsg31);
+//                                intent31.putExtra("message", secretMsg31);
+//                                byte[] secretMsgtest = Base64.getDecoder().decode(msg.getSecretMsg());
                                 mContext.sendBroadcast(intent31);
 
                                 if (mContext instanceof Activity) {
@@ -187,6 +263,8 @@ public class WebSocketManager {
                                             Toast.makeText(mContext, "收到新消息捏" , Toast.LENGTH_SHORT).show();                                        }
                                     });
                                 }
+
+
                                 break;
                             default:
                                 // 执行默认语句
@@ -201,17 +279,18 @@ public class WebSocketManager {
             @Override
             public void onClose(int code, String reason, boolean remote) {
                 Log.d("WebSocket", "Connection closed");
+                stopHeartbeat();
             }
 
             @Override
             public void onError(Exception ex) {
                 Log.e("WebSocket", "Error occurred: " + ex.getMessage());
+                stopHeartbeat();
             }
         };
         websocket.connect();
 
     }
-    //我的android项目，在login.java中完成里websocket的连接，我要怎么在 friendList.java中调用这个websocket连接或者websocket的send方法
 
     public void disconnect() {
         if (websocket != null) {
@@ -226,6 +305,32 @@ public class WebSocketManager {
             Log.e("WebSocket", "Not connected or connection closed");
         }
     }
+
+    // 在连接成功后启动定时器发送心跳包
+    private void startHeartbeat() {
+        mExecutor = Executors.newSingleThreadScheduledExecutor();
+        mFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (websocket != null && websocket.isOpen()) {
+                    websocket.send("heartbeat"); // 发送心跳包
+                }
+            }
+        }, HEARTBEAT_INTERVAL, HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
+    }
+
+    // 在连接断开后停止心跳定时器
+    private void stopHeartbeat() {
+        if (mFuture != null) {
+            mFuture.cancel(true);
+            mFuture = null;
+        }
+        if (mExecutor != null) {
+            mExecutor.shutdown();
+            mExecutor = null;
+        }
+    }
+
 
 }
 

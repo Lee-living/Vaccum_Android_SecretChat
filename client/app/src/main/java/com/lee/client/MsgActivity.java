@@ -49,6 +49,9 @@ public class MsgActivity extends AppCompatActivity {
     private BroadcastReceiver receiver30;
     private BroadcastReceiver receiver31;
 
+    DBHelper dbHelper = new DBHelper(this);
+
+
     public MsgActivity() throws IllegalAccessException, InstantiationException {
     }
 
@@ -68,14 +71,24 @@ public class MsgActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
 
-        adapter = new MsgAdapter(msgList);
-        msgRecyclerView.setAdapter(adapter);
-
         //把 聊天对象用户名放到标题
         String friendName = getIntent().getStringExtra("friendName");
         setTitle(friendName);
 
+        msgList = dbHelper.getFriendMessages(friendName);
+
+        adapter = new MsgAdapter(msgList);
+        msgRecyclerView.setAdapter(adapter);
+
+
+        key = Base64.getDecoder().decode(dbHelper.getFriendPublicKey(friendName));
+
+
+
+/*
+
         //获取对面的公钥。
+
         CompletableFuture<String> publicKeyFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 return CA.getPublicKey(friendName);
@@ -97,13 +110,12 @@ public class MsgActivity extends AppCompatActivity {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        key = sha256.digest(sharedSecret);
+        key = sha256.digest(sharedSecret);*/
 
         receiver29 = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 inputText.setText("");
-
             }
         };
         // 接收到29的广播执行操作 发送失败，清空输入框
@@ -116,12 +128,19 @@ public class MsgActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String message = inputText.getText().toString();
-                ReceiveMsg msg = new ReceiveMsg(message, false);
-                msgList.add(msg);
-                // 当有新消息时，刷新RecyclerView中的显示
-                adapter.notifyItemInserted(msgList.size() - 1);
-                // 将RecyclerView定位到最后一行
+//                ReceiveMsg msg = new ReceiveMsg(message, false);
+                dbHelper.insertMessage(friendName,2,message);
+
+                msgList.clear(); // 清空msgList
+                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
+//                msgList.add(msg);
+// 通知adapter数据已改变
+                adapter.notifyDataSetChanged();
+// 定位到最后一行
                 msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
+//                dbHelper.clearMessages("_user");
+
                 inputText.setText("");
             }
         };
@@ -129,7 +148,31 @@ public class MsgActivity extends AppCompatActivity {
         IntentFilter filter30 = new IntentFilter("30");
         registerReceiver(receiver30, filter30);
 
+
         receiver31 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = inputText.getText().toString();
+//                ReceiveMsg msg = new ReceiveMsg(message, false);
+
+                msgList.clear(); // 清空msgList
+                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
+// 通知adapter数据已改变
+                adapter.notifyDataSetChanged();
+// 定位到最后一行
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
+//                dbHelper.clearMessages("_user");
+
+            }
+        };
+        // 接收到31的广播执行操作   清空输入框
+        IntentFilter filter31 = new IntentFilter("31");
+        registerReceiver(receiver31, filter31);
+
+
+
+    /*    receiver31 = new BroadcastReceiver() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -149,6 +192,7 @@ public class MsgActivity extends AppCompatActivity {
                 String message31 = new String(messageBytes31, StandardCharsets.UTF_8);
                 ReceiveMsg msg = new ReceiveMsg(message31, true);
                 msgList.add(msg);
+                System.out.println(msgList);
                 // 当有新消息时，刷新RecyclerView中的显示
                 adapter.notifyItemInserted(msgList.size() - 1);
                 // 将RecyclerView定位到最后一行
@@ -157,8 +201,7 @@ public class MsgActivity extends AppCompatActivity {
         };
         // 接收到31的广播执行操作   解密消息  刷新对话列表
         IntentFilter filter31 = new IntentFilter("31");
-        registerReceiver(receiver31, filter31);
-
+        registerReceiver(receiver31, filter31);*/
         //发消息的点击事件
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,10 +219,29 @@ public class MsgActivity extends AppCompatActivity {
 //                    System.out.println(ciphertext);
                     Message msg = new Message(3,friendName,null, ciphertext);
                     client.sendMessage(gson.toJson(msg));
+
+//                    msgList = dbHelper.getFriendMessages("_user");
+//                    System.out.println(msgList);
+//                    adapter.notifyItemInserted(msgList.size() - 1);
+//                    // 将RecyclerView定位到最后一行
+//                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
+
                 }
             }
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 注销广播接收器
+        if (receiver30 != null) {
+            unregisterReceiver(receiver30);
+            receiver30 = null;
+        }
+    }
+
 }
 
 //    private void initMsgs() {
