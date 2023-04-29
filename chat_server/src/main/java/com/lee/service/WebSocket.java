@@ -194,68 +194,9 @@ public class WebSocket {
         // 处理错误
     }
 
-
     public void sendMessage(Message msg) {
         // 发送消息
     }
 
-
-
-
 }
-
-
-
-          /*      if(msg.getSign() == 1){
-                    //接受  1  获取在线信息
-                    FriendList refresh = new FriendList(SessionSet);
-                    String responseMsgjson = objectMapper.writeValueAsString(refresh.RefreshList());
-                    // 将消息发送回客户端
-                    session.getBasicRemote().sendText(responseMsgjson);
-                    System.out.println(responseMsgjson);
-                }else if(msg.getSign() == 2){
-                    //接受  2 登陆请求
-                    Login login = new Login(msg.getDate(),SessionSet);
-                    //验证登陆
-                    Message responseMsg = login.proveLogin();
-                    if(responseMsg.getSign() == 20) {
-                        //登陆成功给session绑定username
-                        session.getUserProperties().put("username", msg.getDate().getUser());
-                        System.out.println((String) session.getUserProperties().get("username"));
-                        //再转json
-                        String responseMsgjson = objectMapper.writeValueAsString(responseMsg);
-                        System.out.println(session.getBasicRemote());
-                        // 将登陆成功发送回客户端
-                        session.getBasicRemote().sendText(responseMsgjson);
-                    }else {
-                        String responseMsgjson = objectMapper.writeValueAsString(responseMsg);
-                        // 将登陆失败发送回客户端
-                        session.getBasicRemote().sendText(responseMsgjson);
-                    }
-                }else if(msg.getSign() == 3){
-                    //接受到 3 发消息请求
-                    //获取当前session的username，发给接受者，免得不知道是谁发的。
-                    String username = (String) session.getUserProperties().get("username");
-                    //创建一个Msg对象，处理收发消息
-                    TransferMsg copeMsg = new TransferMsg(msg.getDate(),username);
-                    //循环找 接受消息者在不在线
-                    for (Session session : SessionSet) {
-                        //当前遍历session 的name放到sendname
-                        String sendname = (String) session.getUserProperties().get("username");
-                        // 如果找到对应的用户
-                        if (sendname != null && username.equals(copeMsg.sendMsg().getDate().getUser())) {
-                            // 发送消息到接受消息客户端  copeMsg.sendMsg()是Msg对象copeMsg处理过后发给  接受者的 序列化一下
-                            String sendMsgjson = objectMapper.writeValueAsString(copeMsg.sendMsg());
-                            session.getBasicRemote().sendText(sendMsgjson);
-
-                            // 发送消息到发送者  因为发消息成功了 copeMsg.responseMsgYes()是Msg对象copeMsg处理过后发给  发送者的 序列化一下
-                            String responseMsgjson = objectMapper.writeValueAsString(copeMsg.responseMsgYes());
-                            session.getBasicRemote().sendText(responseMsgjson);
-                        }else {
-                            // 发送消息到发送者  因为发消息失败了 copeMsg.responseMsgNot()是Msg对象copeMsg处理过后发给  发送者的 序列化一下
-                            String responseMsgjson = objectMapper.writeValueAsString(copeMsg.responseMsgNot());
-                            session.getBasicRemote().sendText(responseMsgjson);
-                        }
-                    }
-                }*/
 

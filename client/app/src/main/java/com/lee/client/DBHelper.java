@@ -1,5 +1,6 @@
 package com.lee.client;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,10 +18,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
-
+    // 创建好友公钥表
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // 创建好友公钥表
         db.execSQL("CREATE TABLE IF NOT EXISTS friend_keys ("
                 + "user TEXT PRIMARY KEY,"
                 + "public_key TEXT"
@@ -49,6 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // 获取好友公钥
+    @SuppressLint("Range")
     public String getFriendPublicKey(String user) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM friend_keys WHERE user = ?", new String[]{user});
@@ -83,6 +84,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // 获取聊天记录
+    @SuppressLint("Range")
     public List<ReceiveMsg> getFriendMessages(String tableName) {
         List<ReceiveMsg> messages = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -90,7 +92,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + tableFullName, null);
         while (cursor.moveToNext()) {
             String message = cursor.getString(cursor.getColumnIndex("message"));
-            int flag = cursor.getInt(cursor.getColumnIndex("flag"));
+             int flag = cursor.getInt(cursor.getColumnIndex("flag"));
             ReceiveMsg receiveMsg = new ReceiveMsg(message, flag == 1);
             messages.add(receiveMsg);
         }
@@ -98,6 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
         return messages;
     }
+
     /*public Cursor getMessages(String tableName) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + tableName, null);

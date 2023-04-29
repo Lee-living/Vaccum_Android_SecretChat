@@ -43,7 +43,6 @@ public class MaintestActivity extends AppCompatActivity {
         friendsList = findViewById(R.id.friends_list);
         refreshButton = findViewById(R.id.refresh_button);
 
-
         //把用户列表放到friends
         if(client.get() != null && !client.get().equals(null)){
             for (int i = 0; i < client.get().length; i++) {
@@ -55,12 +54,6 @@ public class MaintestActivity extends AppCompatActivity {
                 }
             }
         }
-
-        //进入在线好友列表后，获取所有人的公钥，全生成共享密钥KEY放到数据库里
-        // 每次来信息直接解密后放到数据库，免得每次点进去都再获取一次对面的公钥
-        // 对面每次登陆公钥会更新，服务器就每次有上线的，就通知客户端一下，重新拉公钥然后生成共享密钥。
-
-
 
         //好友列表适配器 friends放进去
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friends);

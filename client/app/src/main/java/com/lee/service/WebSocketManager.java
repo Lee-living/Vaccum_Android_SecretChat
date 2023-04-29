@@ -10,27 +10,20 @@ import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.lee.client.DBHelper;
 import com.lee.client.LoginActivity;
 import com.lee.client.MaintestActivity;
-import com.lee.client.MsgActivity;
 import com.lee.domain.Message;
 
 import com.lee.domain.ReceiveMessage;
-import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLOutput;
-import java.util.Arrays;
+
 import java.util.Base64;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.Executors.*;
@@ -40,7 +33,6 @@ public class WebSocketManager {
 
     private static final int HEARTBEAT_INTERVAL = 5000; // 心跳间隔时间
 
-    private Timer mHeartbeatTimer;
     ScheduledExecutorService mExecutor;
     ScheduledFuture<?> mFuture;
 
@@ -51,6 +43,7 @@ public class WebSocketManager {
         return splitUsernames;
     }
     private static Context mContext;
+//    WebSocketManager client = WebSocketManager.getInstance(mContext);
     private static final int THREAD_POOL_SIZE = 5; // 线程池大小
     private static ExecutorService executorService; // 线程池
     private static WebSocketManager instance;
@@ -73,7 +66,7 @@ public class WebSocketManager {
     //连接websocket服务器
     public void connect( ) {
         // 连接到 WebSocket 服务器并设置回调
-        URI uri = URI.create("ws://10.0.2.2:8088/websocket");
+        URI uri = URI.create("ws://47.113.145.152:8088/websocket");
         websocket = new WebSocketClient(uri) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
@@ -124,19 +117,7 @@ public class WebSocketManager {
                                 //跳转到好友列表界面
                                 // 创建一个Intent，用于启动登录Activity
                                 Intent intent20 = new Intent(mContext, MaintestActivity.class);
-                                intent20.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                // 创建一个TaskStackBuilder
-                                TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
-                                // 将登录Activity添加到TaskStackBuilder中
-                                stackBuilder.addNextIntentWithParentStack(intent20);
-                                // 获取TaskStackBuilder的PendingIntent
-                                PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                                // 发送PendingIntent，以启动登录Activity并清除任务栈
-                                try {
-                                    pendingIntent.send();
-                                } catch (PendingIntent.CanceledException e) {
-                                    throw new RuntimeException(e);
-                                }
+
                                 send(gson.toJson(new Message(1,null,null,null)));
                                 mContext.startActivity(intent20);
                                 if (mContext instanceof Activity) {
@@ -153,8 +134,8 @@ public class WebSocketManager {
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
-//                                System.out.println(LoginActivity.DHCode);
-//                                System.out.println( LoginActivity.DHCode.getPublicKey());
+                                //System.out.println(LoginActivity.DHCode);
+                                //System.out.println( LoginActivity.DHCode.getPublicKey());
                                 break;
                                 //接受在线好友列表
                             case 10:
@@ -164,10 +145,9 @@ public class WebSocketManager {
                                     splitUsernames = usernames.split(",");
                                     System.out.println(splitUsernames);
                                 }
+                                //获取在线所有好友的公钥生成共享密钥放到数据库，创建每个好友聊天记录的数据库
                                 for (String splitUsername : splitUsernames) {
-
                                     dbHelper.createFriendMessagesTable(splitUsername);
-
                                     CompletableFuture<String> publicKeyFuture = CompletableFuture.supplyAsync(() -> {
                                         try {
                                             return CA.getPublicKey(splitUsername);
@@ -177,7 +157,7 @@ public class WebSocketManager {
                                     });
                                     // 等待返回结果
                                     String publicKeyString = publicKeyFuture.join();
-                                    //System.out.println(publicKeyString);
+                                    System.out.println(publicKeyString);
                                     //把String 的公钥base64转成byte[]方便使用
                                     byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString);
                                     //用对方的公钥 和自己的私钥 生成共享密钥
@@ -191,14 +171,13 @@ public class WebSocketManager {
                                     }
                                     byte[] key = sha256.digest(sharedSecret);
                                     dbHelper.insertOrUpdateFriendKey(splitUsername, Base64.getEncoder().encodeToString(key));
-                                    System.out.println("存的公钥key" + key);
-//                                    System.out.println(Base64.getEncoder().encodeToString(key));
 
+//                                    System.out.println("存的公钥key" + key);
+//                                    System.out.println(Base64.getEncoder().encodeToString(key));
 //                                    final String friendPublicKey = dbHelper.getFriendPublicKey(splitUsername);
 //                                    System.out.println(friendPublicKey);
 
                                 }
-
 
 //                                Intent intent21 = new Intent(mContext, MaintestActivity.class);
 //                                mContext.startActivity(intent21);
@@ -248,7 +227,6 @@ public class WebSocketManager {
                                 dbHelper.insertMessage(msg.getUser(),1,message);
 
 
-
 //                                String secretMsg31 = msg.getSecretMsg();
                                 //发广播消息通知收到消息了
                                 Intent intent31 = new Intent("31");
@@ -287,10 +265,16 @@ public class WebSocketManager {
                 Log.e("WebSocket", "Error occurred: " + ex.getMessage());
                 stopHeartbeat();
             }
+
+            // 构建WebSocket握手请求
+
+
         };
         websocket.connect();
 
     }
+
+
 
     public void disconnect() {
         if (websocket != null) {
@@ -331,58 +315,4 @@ public class WebSocketManager {
         }
     }
 
-
 }
-
-
-
-
-    /*            new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 这里放置接收到消息后的处理逻辑
-                        // 接收到消息时的处理逻辑
-                        System.out.println(message);
-                        //反序列化一下子先
-                        Message msg = gson.fromJson(message, Message.class);
-
-                        switch (msg.getSign()) {
-                            case 19:
-                                // 执行语句1
-                                Intent intent19 = new Intent(mContext, LoginActivity.class);
-                                mContext.startActivity(intent19);
-//                        Toast.makeText(mContext, "登录失败捏" , Toast.LENGTH_SHORT).show();
-                                break;
-                            case 20:
-                                // 执行语句2
-                                Intent intent20 = new Intent(mContext, MaintestActivity.class);
-                                send(gson.toJson(new Message(1,new Date())));
-
-                                mContext.startActivity(intent20);
-//                        Toast.makeText(mContext, msg.getDate().getMsg() , Toast.LENGTH_SHORT).show();
-
-                                //执行一个刷新maintest的列表的操作
-                                break;
-                            case 10:
-
-                                // 执行语句3
-                                if(msg.getDate().getMsg() != null && !msg.getDate().getMsg().isEmpty()){
-                                    String usernames = msg.getDate().getMsg();
-                                    String[] splitUsernames = usernames.split(",");
-                                    System.out.println(splitUsernames);
-                                }
-
-
-                                break;
-                            default:
-                                // 执行默认语句
-
-//                        Toast.makeText(mContext, "可能出错了，什么错呢？我也不知道 " , Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-
-                    }
-                }).start();
-
-     */
-

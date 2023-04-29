@@ -84,9 +84,102 @@ public class MsgActivity extends AppCompatActivity {
         key = Base64.getDecoder().decode(dbHelper.getFriendPublicKey(friendName));
 
 
+        receiver29 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                inputText.setText("");
+            }
+        };
+        // 接收到29的广播执行操作 发送失败，清空输入框
+        IntentFilter filter29 = new IntentFilter("29");
+        registerReceiver(receiver29, filter29);
+
+
+        // 注册广播接收器
+        receiver30 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = inputText.getText().toString();
+                //ReceiveMsg msg = new ReceiveMsg(message, false);
+                //发送成功消息放进数据库
+                dbHelper.insertMessage(friendName,2,message);
+
+                msgList.clear(); // 清空msgList
+                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
+                //msgList.add(msg);
+                // 通知adapter数据已改变
+                adapter.notifyDataSetChanged();
+                // 定位到最后一行
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
+                //dbHelper.clearMessages("_user");
+                inputText.setText("");
+            }
+        };
+        // 接收到30的广播执行操作   清空输入框
+        IntentFilter filter30 = new IntentFilter("30");
+        registerReceiver(receiver30, filter30);
+
+
+        receiver31 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = inputText.getText().toString();
+                //ReceiveMsg msg = new ReceiveMsg(message, false);
+                msgList.clear(); // 清空msgList
+                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
+                // 通知adapter数据已改变
+                adapter.notifyDataSetChanged();
+                // 定位到最后一行
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                //dbHelper.clearMessages("_user");
+
+            }
+        };
+        // 接收到31的广播执行操作   清空输入框
+        IntentFilter filter31 = new IntentFilter("31");
+        registerReceiver(receiver31, filter31);
+
+
+        //发消息的点击事件
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String content = inputText.getText().toString();
+                if (!"".equals(content)) {
+                    // 对消息进行加密
+                    byte[] plaintext = content.getBytes(StandardCharsets.UTF_8);
+                    byte[] ciphertext = new byte[0];
+                    try {
+                        ciphertext = DHKeyExchange.encrypt(plaintext, key);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+//                    System.out.println(ciphertext);
+                    Message msg = new Message(3,friendName,null, ciphertext);
+                    client.sendMessage(gson.toJson(msg));
+
+
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 注销广播接收器
+        if (receiver30 != null) {
+            unregisterReceiver(receiver30);
+            receiver30 = null;
+        }
+    }
+
+}
+
+
 
 /*
-
         //获取对面的公钥。
 
         CompletableFuture<String> publicKeyFuture = CompletableFuture.supplyAsync(() -> {
@@ -112,268 +205,4 @@ public class MsgActivity extends AppCompatActivity {
         }
         key = sha256.digest(sharedSecret);*/
 
-        receiver29 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                inputText.setText("");
-            }
-        };
-        // 接收到29的广播执行操作 发送失败，清空输入框
-        IntentFilter filter29 = new IntentFilter("29");
-        registerReceiver(receiver29, filter29);
 
-
-        // 注册广播接收器
-        receiver30 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String message = inputText.getText().toString();
-//                ReceiveMsg msg = new ReceiveMsg(message, false);
-                dbHelper.insertMessage(friendName,2,message);
-
-                msgList.clear(); // 清空msgList
-                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
-//                msgList.add(msg);
-// 通知adapter数据已改变
-                adapter.notifyDataSetChanged();
-// 定位到最后一行
-                msgRecyclerView.scrollToPosition(msgList.size() - 1);
-
-//                dbHelper.clearMessages("_user");
-
-                inputText.setText("");
-            }
-        };
-        // 接收到30的广播执行操作   清空输入框
-        IntentFilter filter30 = new IntentFilter("30");
-        registerReceiver(receiver30, filter30);
-
-
-        receiver31 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String message = inputText.getText().toString();
-//                ReceiveMsg msg = new ReceiveMsg(message, false);
-
-                msgList.clear(); // 清空msgList
-                msgList.addAll(dbHelper.getFriendMessages(friendName)); // 添加新的聊天记录
-// 通知adapter数据已改变
-                adapter.notifyDataSetChanged();
-// 定位到最后一行
-                msgRecyclerView.scrollToPosition(msgList.size() - 1);
-
-//                dbHelper.clearMessages("_user");
-
-            }
-        };
-        // 接收到31的广播执行操作   清空输入框
-        IntentFilter filter31 = new IntentFilter("31");
-        registerReceiver(receiver31, filter31);
-
-
-
-    /*    receiver31 = new BroadcastReceiver() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String message = intent.getStringExtra("message");
-                //解密消息
-                byte[] secretMsg31 = Base64.getDecoder().decode(message);
-                byte[] messageBytes31 =  new byte[0];
-                try {
-                    System.out.println(secretMsg31);
-                    System.out.println(key);
-                    messageBytes31 = DHKeyExchange.decrypt(secretMsg31,key);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                String message31 = new String(messageBytes31, StandardCharsets.UTF_8);
-                ReceiveMsg msg = new ReceiveMsg(message31, true);
-                msgList.add(msg);
-                System.out.println(msgList);
-                // 当有新消息时，刷新RecyclerView中的显示
-                adapter.notifyItemInserted(msgList.size() - 1);
-                // 将RecyclerView定位到最后一行
-                msgRecyclerView.scrollToPosition(msgList.size() - 1);
-            }
-        };
-        // 接收到31的广播执行操作   解密消息  刷新对话列表
-        IntentFilter filter31 = new IntentFilter("31");
-        registerReceiver(receiver31, filter31);*/
-        //发消息的点击事件
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String content = inputText.getText().toString();
-                if (!"".equals(content)) {
-                    // 对消息进行加密
-                    byte[] plaintext = content.getBytes(StandardCharsets.UTF_8);
-                    byte[] ciphertext = new byte[0];
-                    try {
-                        ciphertext = DHKeyExchange.encrypt(plaintext, key);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-//                    System.out.println(ciphertext);
-                    Message msg = new Message(3,friendName,null, ciphertext);
-                    client.sendMessage(gson.toJson(msg));
-
-//                    msgList = dbHelper.getFriendMessages("_user");
-//                    System.out.println(msgList);
-//                    adapter.notifyItemInserted(msgList.size() - 1);
-//                    // 将RecyclerView定位到最后一行
-//                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
-
-
-                }
-            }
-        });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // 注销广播接收器
-        if (receiver30 != null) {
-            unregisterReceiver(receiver30);
-            receiver30 = null;
-        }
-    }
-
-}
-
-//    private void initMsgs() {
-//        Message msg1 = new Message("Hello guy.", false);
-//        msgList.add(msg1);
-//        Message msg2 = new Message("Hello. Who are you?", true);
-//        msgList.add(msg2);
-//        Message msg3 = new Message("This is Tom. Nice talking to you. ", true);
-//        msgList.add(msg3);
-//    }
-
-  /*     // 从字节数组中重构公钥对象
-        System.out.println(publicKeyBytes);
-        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }*/
-
-
- /*  PublicKey publicKey = null;
-        try {
-            publicKey = keyFactory.generatePublic(publicKeySpec);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(publicKey);
-        System.out.println(publicKey);
-        */
-
-/*
-        byte[] sharedSecret;
-        try {
-            sharedSecret = DHCode.generateSharedSecret(publicKey);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(sharedSecret);
-        */
-
-
-  /*      msgList.add(msg);
-                    adapter.notifyItemInserted(msgList.size() - 1);  // 当有新消息时，刷新RecyclerView中的显示
-                    msgRecyclerView.scrollToPosition(msgList.size() - 1);  // 将RecyclerView定位到最后一行
-                    inputText.setText("");
-                    */
-
-//页面的加载 也等返回值回
-                 /*   adapter = new MsgAdapter(msgList);
-                    msgRecyclerView.setAdapter(adapter);
-
-                    */
-
-
-     /*
-        // 对消息进行加密
-        byte[] plaintext = "Hello, world!".getBytes(StandardCharsets.UTF_8);
-        byte[] ciphertext = new byte[0];
-        try {
-            ciphertext = DHKeyExchange.encrypt(plaintext, key);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(ciphertext);
-        */
-
-        /*
-        // 对消息进行解密
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        byte[] decryptedText = new byte[0];
-        try {
-            decryptedText = DHKeyExchange.decrypt(ciphertext, key);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        String message = new String(decryptedText, StandardCharsets.UTF_8);
-        System.out.println(message);
-
-*/
-     /*   PublicKey receiverPublicKey;
-        try {
-            receiverPublicKey = future.get();
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(receiverPublicKey);
-        // 使用共享密钥进行加密/解密等操作
-        */
-
-
-   /*    okhttp发送
-                            try {
-                                SendMsg.send(msg);
-
-                                //接受返回消息再拆出来状态码判断发送成功没
-                                //成功 刷新自己发送消息的对话框，失败返回原因
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(MsgActivity.this, "在发", Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            } catch (Exception e) {
-                                //抛网路异常
-                                e.printStackTrace();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(MsgActivity.this, "网络连接问题", Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }*/
-
-
-                    /*
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                MyWebSocketClient client = new MyWebSocketClient("ws://10.0.2.2:8088/websocket");
-                                client.connectBlocking();
-                                client.send(stringMsg);
-                                client.closeBlocking();
-                            } catch (Exception e) {
-                                // 处理异常
-                            }
-                        }
-                    }).start();
-
-*/

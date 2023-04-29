@@ -28,17 +28,12 @@ public class LoginActivity extends AppCompatActivity {
     //创建一个DHCode
     public static DHKeyExchange DHCode = new DHKeyExchange();
 
-//    public DHKeyExchange getDHCode(){
-//        return DHCode;
-//    }
-
     //用gson 序列化反序列化用
     Gson gson = new Gson();
 
 
     public LoginActivity() throws NoSuchAlgorithmException, InvalidKeyException {
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                             try {
                                 //发消息给服务器
                                 client.sendMessage(stringMsg);
+                                System.out.println(stringMsg);
                             } catch (Exception e) {
                                 // 处理异常
                             }
@@ -105,93 +101,3 @@ public class LoginActivity extends AppCompatActivity {
 }
 
 
-
-
-      /*                    okhttp   发送
-                            try{
-                                //send
-                                SendMsg.send(msg);
-
-                                //接受返回消息再拆出来状态码判断发送成功没
-                                    //成功 跳转，没成功返回 为什么  的通知
-
-                                //发送后的界面返回---要结合 接受返回值判断
-
-                                //跳转主界面，还没改
-                                textViewStatus.setText("Login successful.");
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(LoginActivity.this,"发送成功",Toast.LENGTH_LONG).show();
-                                    }
-                                });
-
-                                }catch (Exception e){
-                                //抛网路异常
-                                e.printStackTrace();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(LoginActivity.this,"网络连接问题",Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-*/
-
-
-
-
-/*
-*
-*  new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
-                                //连服务器
-                                OkHttpClient client = new OkHttpClient();
-
-                                Gson gson = new Gson();
-                                String json = gson.toJson(msg);
-
-                                RequestBody body = RequestBody.create(JSON, json);
-
-
-                                Request reqs = new Request.Builder()
-        //                                        .url("http://192.168.0.100:8089/test/test")
-                                        .url("http://10.0.2.2:8089/test/test")
-                                        //.post(RequestBody.create(MediaType.parse("text/plain"), String.valueOf(msg)))
-                                        .post(body)
-                                        .build();
-
-                                //res接收
-                                Response res = client.newCall(reqs).execute();
-
-                                // outtext.setText(res.body().toString());
-                                textViewStatus.setText("Login successful.");
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(LoginActivity.this,"发送成功",Toast.LENGTH_LONG).show();
-                                    }
-                                });
-
-                                }catch (Exception e){
-                                //抛网路异常
-                                e.printStackTrace();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(LoginActivity.this,"网络连接问题",Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-                }
-
-            }).start();
-
-
-*
-* */
