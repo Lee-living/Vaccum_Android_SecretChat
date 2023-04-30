@@ -66,7 +66,7 @@ public class WebSocketManager {
     //连接websocket服务器
     public void connect( ) {
         // 连接到 WebSocket 服务器并设置回调
-        URI uri = URI.create("ws://47.113.145.152:8088/websocket");
+        URI uri = URI.create("ws:///websocket");
         websocket = new WebSocketClient(uri) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {

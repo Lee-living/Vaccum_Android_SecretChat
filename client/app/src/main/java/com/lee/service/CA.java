@@ -25,7 +25,7 @@ public class CA {
                 .build();
         System.out.println(body.toString());
         Request request = new Request.Builder()
-                .url("ws://47.113.145.152:8089/ca/registerPublicKey")
+                .url("ws:///ca/registerPublicKey")
                 .post(body)
                 .build();
         Response response = client.newCall(request).execute();
@@ -35,7 +35,7 @@ public class CA {
     public static String getPublicKey(String username) throws IOException {
 
         Request request = new Request.Builder()
-                .url("ws://47.113.145.152:8089/ca/getPublicKey?username=" + username)
+                .url("ws:///ca/getPublicKey?username=" + username)
                 .build();
         try (Response response = client.newCall(request).execute()) {
             return response.body().string();
